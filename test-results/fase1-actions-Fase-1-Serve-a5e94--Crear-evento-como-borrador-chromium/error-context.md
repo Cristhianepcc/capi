@@ -1,0 +1,143 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e6]:
+          - generic [ref=e8]: volunteer_activism
+          - generic [ref=e9]:
+            - heading "Capi" [level=1] [ref=e10]
+            - paragraph [ref=e11]: Consola Organizador
+        - navigation [ref=e13]:
+          - link "dashboard Dashboard" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e15]: dashboard
+            - generic [ref=e16]: Dashboard
+          - link "calendar_today Eventos" [ref=e17] [cursor=pointer]:
+            - /url: /dashboard/events
+            - generic [ref=e18]: calendar_today
+            - generic [ref=e19]: Eventos
+          - link "group Voluntarios" [ref=e20] [cursor=pointer]:
+            - /url: /dashboard/volunteers
+            - generic [ref=e21]: group
+            - generic [ref=e22]: Voluntarios
+          - link "corporate_fare Instituciones" [ref=e23] [cursor=pointer]:
+            - /url: /dashboard/institutions
+            - generic [ref=e24]: corporate_fare
+            - generic [ref=e25]: Instituciones
+          - link "analytics Métricas" [ref=e26] [cursor=pointer]:
+            - /url: /dashboard/analytics
+            - generic [ref=e27]: analytics
+            - generic [ref=e28]: Métricas
+          - link "star Reseñas" [ref=e29] [cursor=pointer]:
+            - /url: /dashboard/reviews
+            - generic [ref=e30]: star
+            - generic [ref=e31]: Reseñas
+      - generic [ref=e32]:
+        - link "add Crear Evento" [ref=e33] [cursor=pointer]:
+          - /url: /dashboard/events/new
+          - generic [ref=e34]: add
+          - text: Crear Evento
+        - generic [ref=e35]:
+          - generic [ref=e36]: AR
+          - generic [ref=e37]:
+            - paragraph [ref=e38]: Alex Rivera
+            - paragraph [ref=e39]: Organizador Principal
+          - generic [ref=e40] [cursor=pointer]: settings
+    - generic [ref=e41]:
+      - banner [ref=e42]:
+        - generic [ref=e44]:
+          - generic [ref=e45]: search
+          - textbox "Buscar eventos, voluntarios..." [ref=e46]
+        - generic [ref=e47]:
+          - button "notifications" [ref=e48]:
+            - generic [ref=e49]: notifications
+          - button "download Exportar" [ref=e51]:
+            - generic [ref=e52]: download
+            - text: Exportar
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - link "arrow_back" [ref=e56] [cursor=pointer]:
+            - /url: /dashboard/events
+            - generic [ref=e57]: arrow_back
+          - generic [ref=e58]:
+            - heading "Crear Nuevo Evento" [level=2] [ref=e59]
+            - paragraph [ref=e60]: Completa la información para publicar tu evento.
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - heading "1 Información Básica" [level=3] [ref=e63]:
+              - generic [ref=e64]: "1"
+              - text: Información Básica
+            - generic [ref=e65]:
+              - generic [ref=e66]: Título del evento*
+              - 'textbox "Ej: Taller STEM para Niños 2024" [ref=e67]': Borrador E2E Testing
+            - generic [ref=e68]:
+              - generic [ref=e69]: Descripción corta*
+              - textbox "Breve descripción del evento (aparece en las cards de listado)..." [ref=e70]: Este borrador fue creado por la suite de testing automatizada.
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - generic [ref=e73]: Tipo de evento*
+                - combobox [ref=e74]:
+                  - option "Seleccionar tipo..."
+                  - option "Taller"
+                  - option "Conferencia"
+                  - option "Charla" [selected]
+                  - option "Programa"
+                  - option "Voluntariado Educativo"
+                  - option "Evento STEM"
+                  - option "Actividad Comunitaria"
+              - generic [ref=e75]:
+                - generic [ref=e76]: Fecha*
+                - textbox [ref=e77]: 2026-07-20
+          - generic [ref=e78]:
+            - heading "2 Ubicación" [level=3] [ref=e79]:
+              - generic [ref=e80]: "2"
+              - text: Ubicación
+            - generic [ref=e81]:
+              - generic [ref=e82]: Nombre del lugar*
+              - 'textbox "Ej: Centro de Innovación Tech" [ref=e83]': Lugar Borrador
+            - generic [ref=e84]:
+              - generic [ref=e85]: Dirección completa*
+              - 'textbox "Ej: Av. Universitaria 800, Lima" [ref=e86]': Dirección Borrador 456
+          - generic [ref=e87]:
+            - heading "3 Voluntarios y Alcance" [level=3] [ref=e88]:
+              - generic [ref=e89]: "3"
+              - text: Voluntarios y Alcance
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - generic [ref=e92]: Voluntarios necesarios*
+                - spinbutton [ref=e93]: "5"
+              - generic [ref=e94]:
+                - generic [ref=e95]: Objetivo de estudiantes impactados*
+                - spinbutton [ref=e96]: "20"
+          - generic [ref=e97]:
+            - heading "4 Institución y Sponsors" [level=3] [ref=e98]:
+              - generic [ref=e99]: "4"
+              - text: Institución y Sponsors
+            - generic [ref=e100]:
+              - generic [ref=e101]: Institución anfitriona*
+              - 'textbox "Ej: Universidad Nacional de Ingeniería" [ref=e102]': Instituto Borrador
+            - generic [ref=e103]:
+              - generic [ref=e104]: Sponsors (separados por comas)
+              - 'textbox "Ej: Google, Microsoft, Intel" [ref=e105]'
+          - generic [ref=e106]:
+            - heading "5 Descripción Detallada" [level=3] [ref=e107]:
+              - generic [ref=e108]: "5"
+              - text: Descripción Detallada
+            - generic [ref=e109]:
+              - generic [ref=e110]: Sobre el evento*
+              - 'textbox "Descripción completa del evento: objetivos, actividades, a quién va dirigido..." [ref=e111]': Un borrador de evento para verificar que se guarda con el status correcto en la BD.
+          - generic [ref=e112]:
+            - link "Cancelar" [ref=e113] [cursor=pointer]:
+              - /url: /dashboard/events
+            - generic [ref=e114]:
+              - button "Guardar borrador" [ref=e115]
+              - button "publish Publicar Evento" [ref=e116]:
+                - generic [ref=e117]: publish
+                - text: Publicar Evento
+  - button "Open Next.js Dev Tools" [ref=e123] [cursor=pointer]:
+    - img [ref=e124]
+  - alert [ref=e127]
+```

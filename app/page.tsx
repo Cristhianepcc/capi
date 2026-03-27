@@ -3,9 +3,10 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import EventCard from "@/components/EventCard";
-import { events, stats } from "@/lib/data";
+import { getEvents, getStats, getPublicCommunities } from "@/lib/queries";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [events, stats, communities] = await Promise.all([getEvents(), getStats(), getPublicCommunities()]);
   const featuredEvents = events.slice(0, 3);
 
   return (
@@ -56,11 +57,11 @@ export default function HomePage() {
                   <div key={i} className={`h-10 w-10 rounded-full border-2 border-white ${c}`} />
                 ))}
                 <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-[#f49d25] text-[10px] font-bold text-white">
-                  50+
+                  {stats.totalVolunteers}
                 </div>
               </div>
               <p className="text-sm font-medium text-slate-600">
-                Con la confianza de más de 2,000+ organizaciones
+                Con la confianza de {stats.institutionsBenefited}+ instituciones aliadas
               </p>
             </div>
           </div>
@@ -83,7 +84,7 @@ export default function HomePage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Impacto Social</p>
-                <p className="text-xl font-black text-slate-900">+42% este mes</p>
+                <p className="text-xl font-black text-slate-900">{stats.studentsReached} estudiantes</p>
               </div>
             </div>
           </div>
@@ -132,85 +133,62 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Cómo funciona ─────────────────────────────────────────── */}
-        <section className="mt-24" id="como-funciona">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">¿Cómo funciona?</h2>
-            <p className="mt-2 text-slate-600 max-w-xl mx-auto">
-              En tres simples pasos conectamos organizadores, voluntarios e instituciones.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "01",
-                icon: "add_circle",
-                title: "Crea tu evento",
-                desc: "Publica tu evento con toda la información: fecha, lugar, voluntarios necesarios e institución anfitriona.",
-              },
-              {
-                step: "02",
-                icon: "group_add",
-                title: "Recibe postulaciones",
-                desc: "Los voluntarios se postulan a tu evento. Tú apruebas, asignas roles y gestionas horarios fácilmente.",
-              },
-              {
-                step: "03",
-                icon: "insights",
-                title: "Mide el impacto",
-                desc: "Después del evento, accede a métricas de alcance: voluntarios, asistentes, horas y estudiantes impactados.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="flex flex-col gap-4 rounded-2xl bg-white border border-slate-100 p-8 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl font-black text-[#f49d25]/20">{item.step}</span>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f49d25]/10 text-[#f49d25]">
-                    <span className="material-symbols-outlined">{item.icon}</span>
+        {/* ── Comunidades ──────────────────────────────────────────── */}
+        {communities.length > 0 && (
+          <section className="mt-24" id="comunidades">
+            <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+              <div className="max-w-xl">
+                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+                  Nuestras Comunidades
+                </h2>
+                <p className="mt-2 text-slate-600">
+                  Conoce a los grupos que organizan eventos de impacto social a traves de Capi.
+                </p>
+              </div>
+              <Link href="/communities" className="group flex items-center gap-1 font-bold text-[#f49d25]">
+                Ver todas
+                <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">chevron_right</span>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {communities.slice(0, 6).map((community) => (
+                <Link
+                  key={community.id}
+                  href={`/communities/${community.slug}`}
+                  className="group flex items-start gap-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:border-[#f49d25]/20"
+                >
+                  <div className="size-14 bg-[#f49d25]/10 rounded-xl flex items-center justify-center text-[#f49d25] flex-shrink-0 transition-transform group-hover:scale-110">
+                    <span className="material-symbols-outlined text-3xl">groups</span>
                   </div>
-                </div>
-                <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Roles ─────────────────────────────────────────────────── */}
-        <section className="mt-24" id="roles">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
-              Para todos los actores del cambio
-            </h2>
-            <p className="mt-2 text-slate-600 max-w-xl mx-auto">
-              Capi conecta a todos quienes hacen posible el voluntariado educativo y comunitario.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: "manage_accounts", title: "Organizadores", desc: "Crea y gestiona eventos, voluntarios, horarios y métricas de impacto." },
-              { icon: "volunteer_activism", title: "Voluntarios", desc: "Busca eventos, postúlate, recibe notificaciones y deja tu reseña." },
-              { icon: "school", title: "Instituciones", desc: "Postúlate para recibir eventos y conecta con organizadores." },
-              { icon: "business", title: "Sponsors", desc: "Patrocina actividades y visualiza el impacto social de tu inversión." },
-            ].map((role) => (
-              <div
-                key={role.title}
-                className="flex flex-col gap-3 rounded-2xl border border-[#f49d25]/10 bg-white p-6 hover:border-[#f49d25]/30 hover:shadow-lg transition-all"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f49d25]/10 text-[#f49d25]">
-                  <span className="material-symbols-outlined">{role.icon}</span>
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">{role.title}</h3>
-                <p className="text-sm text-slate-600">{role.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#f49d25] transition-colors truncate">
+                      {community.name}
+                    </h3>
+                    {community.description && (
+                      <p className="text-sm text-slate-500 mt-1 line-clamp-2">{community.description}</p>
+                    )}
+                    <div className="flex items-center gap-4 mt-3 text-xs text-slate-400 font-medium">
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">person</span>
+                        {community.membersCount} miembros
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">event</span>
+                        {community.eventsCount} eventos
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ── CTA Banner ────────────────────────────────────────────── */}
         <section className="mt-24 rounded-3xl bg-[#f49d25] px-8 py-16 text-center text-white lg:px-16">
           <h2 className="text-3xl font-black sm:text-4xl lg:text-5xl">¿Listo para hacer la diferencia?</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg font-medium opacity-90">
-            Únete a miles de organizadores y voluntarios que están construyendo un futuro mejor juntos.
+            Únete a nuestra comunidad de organizadores y voluntarios que están construyendo un futuro mejor juntos.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-4">
             <Link
@@ -220,10 +198,10 @@ export default function HomePage() {
               Explorar Eventos
             </Link>
             <Link
-              href="/dashboard"
+              href="/login"
               className="rounded-xl border-2 border-white/30 px-8 py-4 font-black text-white backdrop-blur-sm transition-all hover:bg-white/10 active:scale-95"
             >
-              Ir al Dashboard
+              Iniciar sesión
             </Link>
           </div>
         </section>

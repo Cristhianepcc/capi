@@ -1,24 +1,52 @@
 import Link from "next/link";
-import { events, stats } from "@/lib/data";
+import { cookies } from "next/headers";
+import { getEvents, getStats, getVolunteersWithEvents } from "@/lib/queries";
+import { createSupabaseServer } from "@/lib/supabase/server";
 
-const statsCards = [
-  { icon: "volunteer_activism", bg: "bg-orange-100", color: "text-[#f49d25]", label: "Horas de Voluntariado", value: stats.volunteerHours, trend: "+12%", up: true },
-  { icon: "school", bg: "bg-blue-100", color: "text-blue-600", label: "Estudiantes Impactados", value: stats.studentsReached, trend: "+8%", up: true },
-  { icon: "eco", bg: "bg-emerald-100", color: "text-emerald-600", label: "Instituciones Beneficiadas", value: String(stats.institutionsBenefited), trend: "+5%", up: true },
-  { icon: "event_available", bg: "bg-purple-100", color: "text-purple-600", label: "Eventos Activos", value: "64", trend: "+18%", up: true },
-];
+export default async function AnalyticsPage() {
+  const cookieStore = await cookies();
+  const activeCommunityId = cookieStore.get("capi-community")?.value ?? undefined;
 
-const chartBars = [
-  { label: "Educación", thisYear: "85%", lastYear: "60%" },
-  { label: "Ambiente", lastYear: "45%", thisYear: "65%" },
-  { label: "Salud", lastYear: "70%", thisYear: "40%" },
-  { label: "Comunidad", lastYear: "30%", thisYear: "95%" },
-  { label: "Advocacy", lastYear: "55%", thisYear: "50%" },
-  { label: "Tecnología", lastYear: "40%", thisYear: "75%" },
-];
-
-export default function AnalyticsPage() {
+  const [events, stats, volunteers] = await Promise.all([
+    getEvents(true, activeCommunityId),
+    getStats(activeCommunityId),
+    getVolunteersWithEvents(activeCommunityId),
+  ]);
   const upcoming = events.slice(0, 4);
+
+  // Compute real KPIs
+  const activeVolunteers = volunteers.filter((v) => v.status === "aprobado").length;
+  const totalApplications = volunteers.length;
+  const applicationRate = totalApplications > 0 ? Math.round((activeVolunteers / totalApplications) * 100) : 0;
+
+  // Count sponsors
+  const supabase = await createSupabaseServer();
+  const { count: sponsorCount } = await supabase.from("sponsors").select("id", { count: "exact", head: true });
+  const activeSponsors = sponsorCount ?? 0;
+
+  // Events per type for chart
+  const typeCount: Record<string, number> = {};
+  events.forEach((e) => {
+    typeCount[e.type] = (typeCount[e.type] || 0) + 1;
+  });
+
+  const chartCategories = [
+    { label: "Taller", key: "Taller" },
+    { label: "Conferencia", key: "Conferencia" },
+    { label: "Charla", key: "Charla" },
+    { label: "Programa", key: "Programa" },
+    { label: "STEM", key: "Evento STEM" },
+    { label: "Voluntariado", key: "Voluntariado Educativo" },
+  ];
+
+  const maxCount = Math.max(...chartCategories.map((c) => typeCount[c.key] || 0), 1);
+
+  const statsCards = [
+    { icon: "volunteer_activism", bg: "bg-orange-100", color: "text-[#f49d25]", label: "Horas de Voluntariado", value: stats.volunteerHours, trend: `${activeVolunteers} activos`, up: true },
+    { icon: "school", bg: "bg-blue-100", color: "text-blue-600", label: "Estudiantes Impactados", value: stats.studentsReached, trend: "objetivo total", up: true },
+    { icon: "eco", bg: "bg-emerald-100", color: "text-emerald-600", label: "Instituciones Beneficiadas", value: String(stats.institutionsBenefited), trend: "registradas", up: true },
+    { icon: "event_available", bg: "bg-purple-100", color: "text-purple-600", label: "Eventos Registrados", value: String(stats.eventsHosted), trend: "en plataforma", up: true },
+  ];
 
   return (
     <div className="flex-1 overflow-y-auto p-8">
@@ -31,12 +59,7 @@ export default function AnalyticsPage() {
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium shadow-sm text-slate-700">
             <span className="material-symbols-outlined text-sm">calendar_month</span>
-            Últimos 30 días
-            <span className="material-symbols-outlined text-sm">expand_more</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium shadow-sm text-slate-700">
-            <span className="material-symbols-outlined text-sm">map</span>
-            Todas las regiones
+            Ultimos 30 dias
             <span className="material-symbols-outlined text-sm">expand_more</span>
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-[#f49d25] text-white rounded-lg text-sm font-bold shadow-lg shadow-[#f49d25]/20">
@@ -54,9 +77,8 @@ export default function AnalyticsPage() {
               <div className={`p-2 ${s.bg} ${s.color} rounded-lg`}>
                 <span className="material-symbols-outlined">{s.icon}</span>
               </div>
-              <span className={`text-xs font-bold flex items-center ${s.up ? "text-emerald-500" : "text-rose-500"}`}>
+              <span className="text-xs font-bold flex items-center text-emerald-500">
                 {s.trend}
-                <span className="material-symbols-outlined text-xs">{s.up ? "trending_up" : "trending_down"}</span>
               </span>
             </div>
             <p className="text-slate-500 text-xs font-medium uppercase tracking-wider">{s.label}</p>
@@ -71,36 +93,27 @@ export default function AnalyticsPage() {
         <div className="lg:col-span-2 bg-white p-8 rounded-xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h4 className="text-lg font-bold text-slate-900">Impacto por Categoría</h4>
-              <p className="text-sm text-slate-500">Distribución de eventos por sector social</p>
-            </div>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-1.5">
-                <span className="size-3 rounded-full bg-[#f49d25]" />
-                <span className="text-xs text-slate-500 font-medium">Este año</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="size-3 rounded-full bg-[#f49d25]/30" />
-                <span className="text-xs text-slate-500 font-medium">Año pasado</span>
-              </div>
+              <h4 className="text-lg font-bold text-slate-900">Eventos por Categoria</h4>
+              <p className="text-sm text-slate-500">Distribucion actual de eventos por tipo</p>
             </div>
           </div>
-          <div className="h-64 flex items-end gap-6 w-full">
-            {chartBars.map((bar) => (
-              <div key={bar.label} className="flex-1 flex flex-col items-center gap-2 group">
-                <div className="w-full flex justify-center gap-1 items-end h-full">
-                  <div
-                    className="w-1/2 bg-[#f49d25]/30 rounded-t transition-all group-hover:bg-[#f49d25]/40"
-                    style={{ height: bar.lastYear }}
-                  />
-                  <div
-                    className="w-1/2 bg-[#f49d25] rounded-t transition-all group-hover:brightness-110"
-                    style={{ height: bar.thisYear }}
-                  />
+          <div className="h-64 flex gap-6 w-full">
+            {chartCategories.map((cat) => {
+              const count = typeCount[cat.key] || 0;
+              const pct = Math.round((count / maxCount) * 100);
+              return (
+                <div key={cat.label} className="flex-1 flex flex-col items-center gap-2 group">
+                  <span className="text-xs font-bold text-slate-600">{count}</span>
+                  <div className="w-full flex justify-center items-end flex-1">
+                    <div
+                      className="w-3/4 bg-[#f49d25] rounded-t transition-all group-hover:brightness-110"
+                      style={{ height: `${Math.max(pct, 5)}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase text-slate-400">{cat.label}</span>
                 </div>
-                <span className="text-[10px] font-bold uppercase text-slate-400">{bar.label}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -109,10 +122,10 @@ export default function AnalyticsPage() {
           <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-6">KPIs del Producto</h4>
           <div className="space-y-5">
             {[
-              { label: "Eventos creados / mes", value: "18", pct: 75, color: "bg-[#f49d25]" },
-              { label: "Voluntarios activos", value: "458", pct: 85, color: "bg-blue-500" },
-              { label: "Tasa de postulación", value: "62%", pct: 62, color: "bg-purple-500" },
-              { label: "Sponsors activos", value: "23", pct: 46, color: "bg-emerald-500" },
+              { label: "Eventos registrados", value: String(stats.eventsHosted), pct: Math.min(stats.eventsHosted * 5, 100), color: "bg-[#f49d25]" },
+              { label: "Voluntarios activos", value: String(activeVolunteers), pct: Math.min(activeVolunteers * 3, 100), color: "bg-blue-500" },
+              { label: "Tasa de aprobacion", value: `${applicationRate}%`, pct: applicationRate, color: "bg-purple-500" },
+              { label: "Sponsors activos", value: String(activeSponsors), pct: Math.min(activeSponsors * 4, 100), color: "bg-emerald-500" },
             ].map((kpi) => (
               <div key={kpi.label}>
                 <div className="flex justify-between mb-1">
@@ -128,7 +141,7 @@ export default function AnalyticsPage() {
 
           <div className="mt-8 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">
             <p className="text-xs text-slate-500 leading-relaxed italic">
-              &quot;Engagement up 12% vs last month. Consider launching a new educational workshop.&quot;
+              &quot;{activeVolunteers} voluntarios activos de {totalApplications} postulaciones. Tasa de aprobacion: {applicationRate}%.&quot;
             </p>
           </div>
         </div>
@@ -138,7 +151,7 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Impact numbers */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
-          <h4 className="text-lg font-bold mb-6 text-slate-900">Métricas de Impacto Global</h4>
+          <h4 className="text-lg font-bold mb-6 text-slate-900">Metricas de Impacto</h4>
           <div className="grid grid-cols-2 gap-6">
             {[
               { icon: "volunteer_activism", label: "Total Voluntarios", value: stats.totalVolunteers, color: "text-[#f49d25]", bg: "bg-[#f49d25]/10" },
@@ -161,7 +174,7 @@ export default function AnalyticsPage() {
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col">
           <div className="p-6 border-b border-slate-100 flex items-center justify-between">
             <div>
-              <h4 className="text-lg font-bold text-slate-900">Próximos Eventos</h4>
+              <h4 className="text-lg font-bold text-slate-900">Proximos Eventos</h4>
               <p className="text-sm text-slate-500">Oportunidades de alto impacto</p>
             </div>
           </div>
@@ -182,7 +195,7 @@ export default function AnalyticsPage() {
                     <h5 className="font-bold text-sm text-slate-900 group-hover:text-[#f49d25] transition-colors">
                       {event.title}
                     </h5>
-                    <p className="text-xs text-slate-500">{event.type} • {event.volunteersNeeded} Voluntarios</p>
+                    <p className="text-xs text-slate-500">{event.type} &bull; {event.volunteersNeeded} Voluntarios</p>
                   </div>
                   <span className="material-symbols-outlined text-slate-300 group-hover:text-[#f49d25] text-sm">
                     arrow_forward_ios

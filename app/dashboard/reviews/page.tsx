@@ -1,9 +1,12 @@
-import { reviews, events } from "@/lib/data";
+import { cookies } from "next/headers";
+import { getReviews, getEvents } from "@/lib/queries";
+import ReviewActions from "./ReviewActions";
 
 const roleColor: Record<string, string> = {
   Voluntaria: "bg-[#f49d25]/10 text-[#f49d25]",
   Voluntario: "bg-[#f49d25]/10 text-[#f49d25]",
-  Institución: "bg-blue-100 text-blue-700",
+  "Institucion": "bg-blue-100 text-blue-700",
+  "Institución": "bg-blue-100 text-blue-700",
   Profesor: "bg-purple-100 text-purple-700",
 };
 
@@ -23,8 +26,17 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-export default function ReviewsPage() {
-  const avgRating = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
+export default async function ReviewsPage() {
+  const cookieStore = await cookies();
+  const activeCommunityId = cookieStore.get("capi-community")?.value ?? undefined;
+
+  const [reviews, events] = await Promise.all([
+    getReviews(activeCommunityId),
+    getEvents(true, activeCommunityId),
+  ]);
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+    : "0.0";
   const five = reviews.filter((r) => r.rating === 5).length;
   const four = reviews.filter((r) => r.rating === 4).length;
 
@@ -46,7 +58,7 @@ export default function ReviewsPage() {
           <div className="w-full space-y-2 mt-4">
             {[5, 4, 3, 2, 1].map((star) => {
               const count = reviews.filter((r) => r.rating === star).length;
-              const pct = (count / reviews.length) * 100;
+              const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
               return (
                 <div key={star} className="flex items-center gap-2">
                   <span className="text-xs text-slate-500 w-2">{star}</span>
@@ -114,7 +126,7 @@ export default function ReviewsPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="size-10 rounded-full bg-[#f49d25]/20 flex items-center justify-center text-[#f49d25] font-bold text-sm border border-[#f49d25]/30">
-                    {review.author.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                    {review.author.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
                   </div>
                   <div>
                     <p className="font-bold text-slate-900 text-sm">{review.author}</p>
@@ -139,14 +151,7 @@ export default function ReviewsPage() {
               <p className="mt-3 text-sm text-slate-600 leading-relaxed">{review.comment}</p>
 
               <div className="mt-4 flex items-center gap-3 pt-4 border-t border-slate-100">
-                <button className="flex items-center gap-1 text-xs text-slate-400 hover:text-[#f49d25] transition-colors">
-                  <span className="material-symbols-outlined text-xs">thumb_up</span>
-                  Útil
-                </button>
-                <button className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 transition-colors">
-                  <span className="material-symbols-outlined text-xs">reply</span>
-                  Responder
-                </button>
+                <ReviewActions reviewId={review.id} />
               </div>
             </div>
           );

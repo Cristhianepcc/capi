@@ -2,18 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCommunity } from "@/lib/communityContext";
 
-const navItems = [
-  { href: "/dashboard", icon: "dashboard", label: "Dashboard", exact: true },
-  { href: "/dashboard/events", icon: "calendar_today", label: "Eventos" },
-  { href: "/dashboard/volunteers", icon: "group", label: "Voluntarios" },
-  { href: "/dashboard/institutions", icon: "corporate_fare", label: "Instituciones" },
-  { href: "/dashboard/analytics", icon: "analytics", label: "Métricas" },
-  { href: "/dashboard/reviews", icon: "star", label: "Reseñas" },
-];
+interface NavItem {
+  href: string;
+  icon: string;
+  label: string;
+  exact?: boolean;
+}
 
 export default function SidebarNav() {
   const pathname = usePathname();
+  const { isSystemAdmin, activeCommunity } = useCommunity();
+
+  const navItems: NavItem[] = [];
+
+  // System admin view - always show admin modules
+  if (isSystemAdmin) {
+    navItems.push({ href: "/dashboard", icon: "dashboard", label: "Dashboard", exact: true });
+    navItems.push({ href: "/dashboard/events", icon: "calendar_today", label: "Eventos" });
+    navItems.push({ href: "/dashboard/volunteers", icon: "group", label: "Voluntarios" });
+    navItems.push({ href: "/dashboard/institutions", icon: "corporate_fare", label: "Instituciones" });
+    navItems.push({ href: "/dashboard/analytics", icon: "analytics", label: "Metricas" });
+    navItems.push({ href: "/dashboard/reviews", icon: "star", label: "Resenas" });
+    navItems.push({ href: "/dashboard/users", icon: "manage_accounts", label: "Usuarios" });
+    navItems.push({ href: "/dashboard/permissions", icon: "admin_panel_settings", label: "Permisos" });
+  } else if (activeCommunity) {
+    // Community admin/leader view
+    const communityRole = activeCommunity.role;
+    const isLeaderOrAdmin = communityRole === "lider" || communityRole === "admin";
+
+    if (isLeaderOrAdmin) {
+      navItems.push({ href: "/dashboard", icon: "dashboard", label: "Dashboard", exact: true });
+    }
+    navItems.push({ href: "/dashboard/events", icon: "calendar_today", label: "Eventos" });
+    if (isLeaderOrAdmin) {
+      navItems.push({ href: "/dashboard/volunteers", icon: "group", label: "Voluntarios" });
+      navItems.push({ href: "/dashboard/institutions", icon: "corporate_fare", label: "Instituciones" });
+      navItems.push({ href: "/dashboard/analytics", icon: "analytics", label: "Metricas" });
+      navItems.push({ href: "/dashboard/reviews", icon: "star", label: "Resenas" });
+    }
+    if (communityRole === "lider") {
+      navItems.push({ href: `/dashboard/communities/${activeCommunity.slug}/members`, icon: "manage_accounts", label: "Miembros" });
+    }
+  } else {
+    // Personal view
+    navItems.push({ href: "/dashboard/my-events", icon: "calendar_today", label: "Mis Eventos" });
+    navItems.push({ href: "/dashboard/profile", icon: "person", label: "Mi Perfil" });
+    navItems.push({ href: "/dashboard/communities", icon: "groups", label: "Mis Comunidades" });
+  }
 
   return (
     <nav className="flex flex-col gap-1">

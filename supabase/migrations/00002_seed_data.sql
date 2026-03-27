@@ -1,0 +1,2 @@
+-- Seed data moved to supabase/seed.sql (only runs in dev via db reset)
+-- This migration is intentionally empty to preserve migration history.

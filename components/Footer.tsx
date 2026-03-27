@@ -19,8 +19,8 @@ export default function Footer() {
             <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-900">Plataforma</h4>
             <ul className="flex flex-col gap-2 text-sm text-slate-500">
               <li><Link href="/events" className="hover:text-[#f49d25] transition-colors">Eventos</Link></li>
+              <li><Link href="/communities" className="hover:text-[#f49d25] transition-colors">Comunidades</Link></li>
               <li><Link href="/dashboard" className="hover:text-[#f49d25] transition-colors">Dashboard</Link></li>
-              <li><Link href="/dashboard/analytics" className="hover:text-[#f49d25] transition-colors">Analíticas</Link></li>
             </ul>
           </div>
 
@@ -28,23 +28,23 @@ export default function Footer() {
             <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-900">Empresa</h4>
             <ul className="flex flex-col gap-2 text-sm text-slate-500">
               <li><Link href="/#nosotros" className="hover:text-[#f49d25] transition-colors">Nosotros</Link></li>
-              <li><Link href="#" className="hover:text-[#f49d25] transition-colors">Blog</Link></li>
-              <li><Link href="#" className="hover:text-[#f49d25] transition-colors">Aliados</Link></li>
+              <li><Link href="/events" className="hover:text-[#f49d25] transition-colors">Blog</Link></li>
+              <li><Link href="/dashboard/institutions" className="hover:text-[#f49d25] transition-colors">Aliados</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-900">Soporte</h4>
             <ul className="flex flex-col gap-2 text-sm text-slate-500">
-              <li><Link href="#" className="hover:text-[#f49d25] transition-colors">Centro de ayuda</Link></li>
-              <li><Link href="#" className="hover:text-[#f49d25] transition-colors">Términos</Link></li>
-              <li><Link href="#" className="hover:text-[#f49d25] transition-colors">Privacidad</Link></li>
+              <li><a href="mailto:soporte@capi.dev" className="hover:text-[#f49d25] transition-colors">Centro de ayuda</a></li>
+              <li><Link href="/terms" className="hover:text-[#f49d25] transition-colors">Términos</Link></li>
+              <li><Link href="/privacy" className="hover:text-[#f49d25] transition-colors">Privacidad</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="mt-12 border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-slate-400">© 2024 Capi. Todos los derechos reservados.</p>
+          <p className="text-xs text-slate-400">© {new Date().getFullYear()} Capi. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

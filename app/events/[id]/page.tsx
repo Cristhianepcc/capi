@@ -3,11 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { events } from "@/lib/data";
-
-export function generateStaticParams() {
-  return events.map((e) => ({ id: e.id }));
-}
+import ShareButton from "@/components/ShareButton";
+import { getEvents } from "@/lib/queries";
+import { getAuthUser } from "@/lib/auth";
+import VolunteerSignupForm from "./VolunteerSignupForm";
+import ReviewForm from "./ReviewForm";
 
 export default async function EventDetailPage({
   params,
@@ -15,6 +15,7 @@ export default async function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const [events, user] = await Promise.all([getEvents(), getAuthUser()]);
   const event = events.find((e) => e.id === id);
   if (!event) notFound();
 
@@ -31,22 +32,36 @@ export default async function EventDetailPage({
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full bg-[#f49d25]/20 px-4 py-1 text-[#f49d25] text-xs font-bold uppercase tracking-wider">
                 <span className="material-symbols-outlined text-sm">calendar_today</span>
-                {event.date} • {event.location}
+                {event.date} - {event.location}
               </div>
               <h1 className="text-4xl font-black leading-tight tracking-tight lg:text-5xl text-slate-900">
                 {event.title.split(" ").slice(0, -1).join(" ")}{" "}
                 <span className="text-[#f49d25]">{event.title.split(" ").slice(-1)}</span>
               </h1>
               <p className="text-lg text-slate-600">{event.description}</p>
+              {event.communityName && (
+                <p className="text-sm text-slate-500 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm text-[#f49d25]">groups</span>
+                  Organizado por{" "}
+                  {event.communitySlug ? (
+                    <Link href={`/communities/${event.communitySlug}`} className="font-semibold text-[#f49d25] hover:underline">
+                      {event.communityName}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold text-slate-700">{event.communityName}</span>
+                  )}
+                </p>
+              )}
 
               <div className="flex flex-wrap gap-4">
-                <button className="flex items-center gap-2 rounded-xl bg-[#f49d25] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#f49d25]/20 hover:scale-[1.02] transition-transform">
+                <a
+                  href="#postularme"
+                  className="flex items-center gap-2 rounded-xl bg-[#f49d25] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#f49d25]/20 hover:scale-[1.02] transition-transform"
+                >
                   <span className="material-symbols-outlined">volunteer_activism</span>
                   Postularme como Voluntario
-                </button>
-                <button className="flex items-center gap-2 rounded-xl border-2 border-[#f49d25]/20 px-8 py-4 text-lg font-bold text-slate-900 hover:bg-[#f49d25]/5 transition-colors">
-                  Compartir
-                </button>
+                </a>
+                <ShareButton title={event.title} url={`/events/${event.id}`} />
               </div>
 
               <div className="flex items-center gap-4 pt-2">
@@ -55,7 +70,7 @@ export default async function EventDetailPage({
                     <div key={i} className={`size-10 rounded-full border-2 border-[#f8f7f5] ${c}`} />
                   ))}
                   <div className="flex size-10 items-center justify-center rounded-full border-2 border-[#f8f7f5] bg-slate-200 text-xs font-bold text-slate-600">
-                    +{event.volunteersJoined - 3}
+                    +{Math.max(0, event.volunteersJoined - 3)}
                   </div>
                 </div>
                 <p className="text-sm font-medium text-slate-500">Ya se unieron a la causa</p>
@@ -64,16 +79,22 @@ export default async function EventDetailPage({
 
             <div className="relative">
               <div className="relative aspect-video w-full rounded-2xl overflow-hidden shadow-2xl">
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                  priority
-                />
+                {event.image ? (
+                  <Image
+                    src={event.image}
+                    alt={event.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                    priority
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-300">
+                    <span className="material-symbols-outlined text-6xl">image</span>
+                  </div>
+                )}
               </div>
-              <div className="absolute -bottom-6 -left-6 rounded-2xl bg-white p-6 shadow-xl border border-[#f49d25]/10">
+              <div className="absolute -bottom-6 -left-6 rounded-2xl bg-white p-6 shadow-xl border border-[#f49d25]/10 hidden sm:block">
                 <div className="flex items-center gap-4">
                   <div className="rounded-lg bg-[#f49d25]/10 p-3 text-[#f49d25]">
                     <span className="material-symbols-outlined text-3xl">location_on</span>
@@ -111,7 +132,7 @@ export default async function EventDetailPage({
                 </div>
                 <p className="text-4xl font-black text-slate-900">{event.volunteersJoined}</p>
                 <p className="mt-4 text-sm text-slate-500">
-                  {event.volunteersNeeded - event.volunteersJoined} cupos restantes para instructores y asistentes.
+                  {event.spotsLeft} cupos restantes para instructores y asistentes.
                 </p>
               </div>
 
@@ -149,7 +170,7 @@ export default async function EventDetailPage({
                   Agenda
                 </h2>
                 <div className="space-y-4">
-                  {event.agenda.map((item, i) => (
+                  {event.agenda.map((item: { time: string; title: string; description: string }, i: number) => (
                     <div
                       key={i}
                       className="flex gap-6 rounded-xl border border-[#f49d25]/10 p-5 bg-white shadow-sm"
@@ -167,6 +188,11 @@ export default async function EventDetailPage({
 
             {/* Sidebar */}
             <div className="space-y-8">
+              {/* Signup form */}
+              <div id="postularme">
+                <VolunteerSignupForm eventId={event.dbId} roles={event.roles} />
+              </div>
+
               {/* Institution */}
               <div className="rounded-2xl border border-[#f49d25]/10 bg-white p-8 shadow-sm">
                 <h3 className="text-xl font-bold mb-6 text-slate-900">Institución Anfitriona</h3>
@@ -188,7 +214,7 @@ export default async function EventDetailPage({
               <div className="rounded-2xl border border-[#f49d25]/10 bg-white p-8 shadow-sm">
                 <h3 className="text-xl font-bold mb-4 text-slate-900">Sponsors</h3>
                 <div className="flex flex-wrap gap-2">
-                  {event.sponsors.map((s) => (
+                  {event.sponsors.map((s: string) => (
                     <span
                       key={s}
                       className="px-3 py-1 rounded-full bg-[#f49d25]/10 text-[#f49d25] text-sm font-bold"
@@ -204,6 +230,11 @@ export default async function EventDetailPage({
                 <p className="text-xs font-bold text-[#f49d25] uppercase mb-1">Ubicación del Evento</p>
                 <p className="text-sm font-bold text-slate-900">{event.fullLocation}</p>
               </div>
+
+              {/* Review Form - only for finalized events */}
+              {event.status === "finalizado" && (
+                <ReviewForm eventId={event.dbId} userEmail={user?.email ?? null} />
+              )}
             </div>
           </div>
         </section>
@@ -218,9 +249,12 @@ export default async function EventDetailPage({
                 Tus habilidades pueden inspirar a un futuro líder. Únete a nuestro equipo de voluntarios hoy.
               </p>
               <div className="flex justify-center gap-4 pt-4 flex-wrap">
-                <button className="rounded-xl bg-[#f49d25] px-10 py-4 font-bold text-[#221a10] hover:scale-105 transition-transform">
+                <a
+                  href="#postularme"
+                  className="rounded-xl bg-[#f49d25] px-10 py-4 font-bold text-[#221a10] hover:scale-105 transition-transform"
+                >
                   Postularme como Voluntario
-                </button>
+                </a>
                 <Link
                   href="/events"
                   className="rounded-xl border border-white/30 px-10 py-4 font-bold text-white hover:bg-white/10 transition-colors"
