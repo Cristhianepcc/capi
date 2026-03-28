@@ -72,11 +72,11 @@ export default async function CommunityDetailPage({
                 <p className="text-xs text-slate-500">Desde {m.joinedAt}</p>
               </div>
               <span className={`text-xs font-bold px-2 py-1 rounded-full capitalize ${
-                m.role === "lider" ? "bg-[#f49d25]/10 text-[#f49d25]" :
-                m.role === "admin" ? "bg-blue-100 text-blue-700" :
+                m.roleName === "lider" ? "bg-[#f49d25]/10 text-[#f49d25]" :
+                m.roleName === "admin" ? "bg-blue-100 text-blue-700" :
                 "bg-slate-100 text-slate-600"
               }`}>
-                {m.role}
+                {m.roleName}
               </span>
             </div>
           ))}

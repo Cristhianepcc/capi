@@ -583,7 +583,7 @@ export async function getUserCommunities(userId: string) {
     id: m.communities.id as string,
     name: m.communities.name as string,
     slug: m.communities.slug as string,
-    role: m.community_roles?.name as string,
+    role: m.community_roles?.name as "admin" | "lider" | "miembro",
   }));
 }
 
@@ -625,7 +625,7 @@ export async function getCommunityRoles(communityId: string) {
   const supabase = await createSupabaseServer();
   const { data: roles, error: rolesError } = await supabase
     .from("community_roles")
-    .select("id, name, description, is_owner")
+    .select("*")
     .eq("community_id", communityId)
     .order("is_owner", { ascending: false })
     .order("created_at", { ascending: true });
@@ -633,19 +633,15 @@ export async function getCommunityRoles(communityId: string) {
   if (rolesError) return [];
 
   // For each role, fetch its permissions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rolesWithPermissions = await Promise.all((roles ?? []).map(async (role: any) => {
+  const rolesWithPermissions = await Promise.all((roles ?? []).map(async (role) => {
     const { data: permissions } = await supabase
       .from("community_role_permissions")
       .select("permission_key")
       .eq("role_id", role.id);
 
     return {
-      id: role.id,
-      name: role.name,
-      description: role.description,
-      isOwner: role.is_owner,
-      permissions: (permissions ?? []).map((p: any) => p.permission_key),
+      ...role,
+      permissions: (permissions ?? []).map((p) => p.permission_key),
     };
   }));
 

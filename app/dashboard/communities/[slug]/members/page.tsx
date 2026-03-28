@@ -28,7 +28,7 @@ export default async function MembersPage({
   const availableRoles = roles.map((r) => ({
     id: r.id,
     name: r.name,
-    isOwner: r.isOwner,
+    isOwner: r.is_owner,
   }));
 
   return (
