@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import ShareButton from "@/components/ShareButton";
 import { getEvents } from "@/lib/queries";
 import { getAuthUser } from "@/lib/auth";
-import VolunteerSignupForm from "./VolunteerSignupForm";
 import ReviewForm from "./ReviewForm";
 
 export default async function EventDetailPage({
@@ -30,9 +29,17 @@ export default async function EventDetailPage({
         <section className="mx-auto max-w-7xl px-6 lg:px-20 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#f49d25]/20 px-4 py-1 text-[#f49d25] text-xs font-bold uppercase tracking-wider">
-                <span className="material-symbols-outlined text-sm">calendar_today</span>
-                {event.date} - {event.location}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#f49d25]/20 px-4 py-1 text-[#f49d25] text-xs font-bold uppercase tracking-wider">
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">calendar_today</span>
+                  {event.date} - {event.location}
+                </div>
+                {event.status === "finalizado" && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-3 py-1 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">check_circle</span>
+                    Finalizado
+                  </span>
+                )}
               </div>
               <h1 className="text-4xl font-black leading-tight tracking-tight lg:text-5xl text-slate-900">
                 {event.title.split(" ").slice(0, -1).join(" ")}{" "}
@@ -41,7 +48,7 @@ export default async function EventDetailPage({
               <p className="text-lg text-slate-600">{event.description}</p>
               {event.communityName && (
                 <p className="text-sm text-slate-500 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm text-[#f49d25]">groups</span>
+                  <span className="material-symbols-outlined text-sm text-[#f49d25]" aria-hidden="true">groups</span>
                   Organizado por{" "}
                   {event.communitySlug ? (
                     <Link href={`/communities/${event.communitySlug}`} className="font-semibold text-[#f49d25] hover:underline">
@@ -54,13 +61,6 @@ export default async function EventDetailPage({
               )}
 
               <div className="flex flex-wrap gap-4">
-                <a
-                  href="#postularme"
-                  className="flex items-center gap-2 rounded-xl bg-[#f49d25] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#f49d25]/20 hover:scale-[1.02] transition-transform"
-                >
-                  <span className="material-symbols-outlined">volunteer_activism</span>
-                  Postularme como Voluntario
-                </a>
                 <ShareButton title={event.title} url={`/events/${event.id}`} />
               </div>
 
@@ -90,14 +90,14 @@ export default async function EventDetailPage({
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-300">
-                    <span className="material-symbols-outlined text-6xl">image</span>
+                    <span className="material-symbols-outlined text-6xl" aria-hidden="true">image</span>
                   </div>
                 )}
               </div>
-              <div className="absolute -bottom-6 -left-6 rounded-2xl bg-white p-6 shadow-xl border border-[#f49d25]/10 hidden sm:block">
+              <div className="mt-4 sm:mt-0 sm:absolute sm:-bottom-6 sm:-left-6 rounded-2xl bg-white p-4 sm:p-6 shadow-xl border border-[#f49d25]/10">
                 <div className="flex items-center gap-4">
                   <div className="rounded-lg bg-[#f49d25]/10 p-3 text-[#f49d25]">
-                    <span className="material-symbols-outlined text-3xl">location_on</span>
+                    <span className="material-symbols-outlined text-3xl" aria-hidden="true">location_on</span>
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase text-slate-400">Ubicación</p>
@@ -116,11 +116,18 @@ export default async function EventDetailPage({
               <div className="rounded-2xl bg-[#f8f7f5] p-8 shadow-sm border border-[#f49d25]/10">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-sm font-bold uppercase tracking-wider text-slate-500">Voluntarios Necesarios</p>
-                  <span className="material-symbols-outlined text-[#f49d25]">groups</span>
+                  <span className="material-symbols-outlined text-[#f49d25]" aria-hidden="true">groups</span>
                 </div>
                 <p className="text-4xl font-black text-slate-900">{event.volunteersNeeded}</p>
-                <div className="mt-4 h-2 w-full rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-[#f49d25]" style={{ width: `${pct}%` }} />
+                <div
+                  className="mt-4 h-2 w-full rounded-full bg-slate-100"
+                  role="progressbar"
+                  aria-valuenow={pct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${pct}% del objetivo de voluntarios alcanzado`}
+                >
+                  <div className="h-full rounded-full bg-[#f49d25] transition-all" style={{ width: `${pct}%` }} />
                 </div>
                 <p className="mt-2 text-sm font-medium text-emerald-600">+{pct}% del objetivo alcanzado</p>
               </div>
@@ -128,7 +135,7 @@ export default async function EventDetailPage({
               <div className="rounded-2xl bg-[#f8f7f5] p-8 shadow-sm border border-[#f49d25]/10">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-sm font-bold uppercase tracking-wider text-slate-500">Inscritos</p>
-                  <span className="material-symbols-outlined text-[#f49d25]">person_add</span>
+                  <span className="material-symbols-outlined text-[#f49d25]" aria-hidden="true">person_add</span>
                 </div>
                 <p className="text-4xl font-black text-slate-900">{event.volunteersJoined}</p>
                 <p className="mt-4 text-sm text-slate-500">
@@ -139,7 +146,7 @@ export default async function EventDetailPage({
               <div className="rounded-2xl bg-[#f49d25] p-8 shadow-lg shadow-[#f49d25]/20 text-[#221a10]">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-sm font-bold uppercase tracking-wider opacity-70">Objetivo de Impacto</p>
-                  <span className="material-symbols-outlined">auto_graph</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">auto_graph</span>
                 </div>
                 <p className="text-4xl font-black">{event.studentsGoal}+</p>
                 <p className="mt-4 text-sm font-medium">
@@ -188,9 +195,36 @@ export default async function EventDetailPage({
 
             {/* Sidebar */}
             <div className="space-y-8">
-              {/* Signup form */}
-              <div id="postularme">
-                <VolunteerSignupForm eventId={event.dbId} roles={event.roles} />
+              {/* Inscription link (attendees) */}
+              <div className="rounded-2xl border border-[#f49d25]/10 bg-white p-8 shadow-sm text-center space-y-4">
+                <div className="size-14 bg-[#f49d25]/10 rounded-full flex items-center justify-center mx-auto">
+                  <span className="material-symbols-outlined text-2xl text-[#f49d25]" aria-hidden="true">how_to_reg</span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-900">Inscripción de Asistentes</h3>
+                <p className="text-sm text-slate-500">¿Quieres asistir a este evento? Completa tu inscripción.</p>
+                <Link
+                  href={`/events/${event.id}/inscripcion`}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#f49d25] px-8 py-3 font-bold text-white shadow-lg shadow-[#f49d25]/20 hover:scale-[1.02] transition-transform"
+                >
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">arrow_forward</span>
+                  Inscribirme
+                </Link>
+              </div>
+
+              {/* Volunteer application link */}
+              <div id="postularme" className="rounded-2xl border border-[#f49d25]/10 bg-white p-8 shadow-sm text-center space-y-4">
+                <div className="size-14 bg-[#f49d25]/10 rounded-full flex items-center justify-center mx-auto">
+                  <span className="material-symbols-outlined text-2xl text-[#f49d25]" aria-hidden="true">volunteer_activism</span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-900">Postulación de Voluntarios</h3>
+                <p className="text-sm text-slate-500">¿Quieres ser voluntario? Postúlate para este evento.</p>
+                <Link
+                  href={`/events/${event.id}/inscripcion`}
+                  className="inline-flex items-center gap-2 rounded-xl border-2 border-[#f49d25] px-8 py-3 font-bold text-[#f49d25] hover:bg-[#f49d25]/5 hover:scale-[1.02] transition-all"
+                >
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">arrow_forward</span>
+                  Postularme
+                </Link>
               </div>
 
               {/* Institution */}
@@ -198,7 +232,7 @@ export default async function EventDetailPage({
                 <h3 className="text-xl font-bold mb-6 text-slate-900">Institución Anfitriona</h3>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="size-16 rounded-xl bg-[#f49d25]/10 flex items-center justify-center text-[#f49d25]">
-                    <span className="material-symbols-outlined text-4xl">school</span>
+                    <span className="material-symbols-outlined text-4xl" aria-hidden="true">school</span>
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900">{event.institution}</h4>
@@ -253,7 +287,7 @@ export default async function EventDetailPage({
                   href="#postularme"
                   className="rounded-xl bg-[#f49d25] px-10 py-4 font-bold text-[#221a10] hover:scale-105 transition-transform"
                 >
-                  Postularme como Voluntario
+                  Ir al formulario de inscripción
                 </a>
                 <Link
                   href="/events"

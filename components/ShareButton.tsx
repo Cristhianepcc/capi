@@ -6,23 +6,29 @@ export default function ShareButton({ title, url }: { title: string; url: string
   const [copied, setCopied] = useState(false);
 
   async function handleShare() {
+    const absoluteUrl =
+      url.startsWith("http") ? url : `${window.location.origin}${url}`;
+
     if (navigator.share) {
-      await navigator.share({ title, url });
+      await navigator.share({ title, url: absoluteUrl });
     } else {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(absoluteUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 3000);
     }
   }
 
   return (
     <button
       onClick={handleShare}
-      className="flex items-center gap-2 rounded-xl border-2 border-[#f49d25]/20 px-8 py-4 text-lg font-bold text-slate-900 hover:bg-[#f49d25]/5 transition-colors"
+      className="flex items-center gap-2 rounded-xl border-2 border-[#f49d25]/20 px-8 py-4 text-lg font-bold text-slate-900 hover:bg-[#f49d25]/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f49d25]"
       aria-label="Compartir evento"
     >
-      <span className="material-symbols-outlined text-lg">share</span>
+      <span className="material-symbols-outlined text-lg" aria-hidden="true">share</span>
       {copied ? "¡Copiado!" : "Compartir"}
+      <span aria-live="polite" className="sr-only">
+        {copied ? "Link copiado al portapapeles" : ""}
+      </span>
     </button>
   );
 }

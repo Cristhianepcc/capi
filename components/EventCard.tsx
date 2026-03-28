@@ -18,7 +18,7 @@ export interface Event {
 
 export default function EventCard({ event }: { event: Event }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:-translate-y-2 hover:shadow-2xl border border-slate-100">
+    <article className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:-translate-y-2 hover:shadow-2xl border border-slate-100 focus-within:ring-2 focus-within:ring-[#f49d25]/50">
       <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
         {event.image ? (
           <Image
@@ -30,22 +30,23 @@ export default function EventCard({ event }: { event: Event }) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-slate-300">
-            <span className="material-symbols-outlined text-4xl">image</span>
+            <span className="material-symbols-outlined text-4xl" aria-hidden="true">image</span>
+            <span className="sr-only">Imagen no disponible</span>
           </div>
         )}
         <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-900 backdrop-blur-sm">
           {event.type}
         </div>
       </div>
-      <div className="flex flex-col gap-2 p-6 flex-1">
+      <div className="flex flex-col gap-2 p-4 sm:p-6 flex-1">
         <div className="flex items-center gap-2 text-[#f49d25]">
-          <span className="material-symbols-outlined text-sm">event</span>
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">event</span>
           <span className="text-xs font-bold uppercase">{event.date} • {event.location}</span>
         </div>
         <h3 className="text-xl font-bold text-slate-900">{event.title}</h3>
         {event.communityName && (
           <p className="text-xs text-slate-500 flex items-center gap-1">
-            <span className="material-symbols-outlined text-xs">groups</span>
+            <span className="material-symbols-outlined text-xs" aria-hidden="true">groups</span>
             Organizado por{" "}
             {event.communitySlug ? (
               <Link
@@ -63,19 +64,19 @@ export default function EventCard({ event }: { event: Event }) {
         <p className="text-sm text-slate-500 line-clamp-2 flex-1">{event.description}</p>
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-1 text-slate-400">
-            <span className="material-symbols-outlined text-sm">person</span>
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">person</span>
             <span className="text-xs font-medium">
               {event.spotsLeft > 0 ? `${event.spotsLeft} cupos disponibles` : "Sin cupos"}
             </span>
           </div>
           <Link
             href={`/events/${event.id}`}
-            className="text-sm font-bold text-[#f49d25] hover:underline underline-offset-4"
+            className="text-sm font-bold text-[#f49d25] hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f49d25] rounded-md px-1"
           >
-            Ver mas
+            Ver más
           </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

@@ -42,7 +42,7 @@ export default function VolunteerSignupForm({ eventId, roles }: VolunteerSignupF
     return (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center space-y-3">
         <div className="size-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-          <span className="material-symbols-outlined text-2xl text-emerald-600">check_circle</span>
+          <span className="material-symbols-outlined text-2xl text-emerald-600" aria-hidden="true">check_circle</span>
         </div>
         <h3 className="text-lg font-bold text-emerald-800">¡Postulación enviada!</h3>
         <p className="text-sm text-emerald-600">
@@ -54,12 +54,12 @@ export default function VolunteerSignupForm({ eventId, roles }: VolunteerSignupF
 
   return (
     <div className="rounded-2xl border border-[#f49d25]/10 bg-white p-8 shadow-sm">
-      <h3 className="text-xl font-bold mb-2 text-slate-900">Postularme como Voluntario</h3>
+      <h3 className="text-xl font-bold mb-2 text-slate-900">Formulario de Inscripción</h3>
       <p className="text-sm text-slate-500 mb-6">Completa tus datos para inscribirte en este evento.</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3" role="alert">
             {error}
           </div>
         )}
@@ -104,9 +104,9 @@ export default function VolunteerSignupForm({ eventId, roles }: VolunteerSignupF
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#f49d25] px-6 py-3 font-bold text-white shadow-lg shadow-[#f49d25]/20 hover:brightness-105 transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#f49d25] px-6 py-3 font-bold text-white shadow-lg shadow-[#f49d25]/20 hover:brightness-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f49d25]"
         >
-          <span className="material-symbols-outlined text-sm">volunteer_activism</span>
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">volunteer_activism</span>
           {loading ? "Enviando..." : "Enviar Postulación"}
         </button>
       </form>
