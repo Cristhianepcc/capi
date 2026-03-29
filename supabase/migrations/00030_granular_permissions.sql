@@ -89,6 +89,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ==== 7. Update community_members RLS policies to use new permission system ====
 -- Drop old policies that use the deprecated role column
+DROP POLICY IF EXISTS "community_members_select_all" ON community_members;
 DROP POLICY IF EXISTS "community_members_insert_leader" ON community_members;
 DROP POLICY IF EXISTS "community_members_update_leader" ON community_members;
 DROP POLICY IF EXISTS "community_members_delete_leader_or_self" ON community_members;
